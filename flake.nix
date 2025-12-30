@@ -8,12 +8,17 @@
   outputs = { self, nixpkgs, ... }: 
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in
     {
       nixosConfigurations = {
         nixos = nixpkgs.lib.nixosSystem {
           inherit system;
+          # We pass the specially configured 'pkgs' to the modules
+          specialArgs = { inherit pkgs; };
           modules = [
             ./configuration.nix
             { nix.settings.experimental-features = [ "nix-command" "flakes" ]; }
